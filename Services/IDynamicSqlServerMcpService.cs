@@ -1,8 +1,11 @@
-﻿using Incaricotech.Wms.DynamicMcp.Models;
+using gemini.dynamic.mcp.Models;
 
-namespace Incaricotech.Wms.DynamicMcp.Services;
+namespace gemini.dynamic.mcp.Services;
 
 public interface IDynamicSqlServerMcpService
 {
-    Task ExecuteDynamicQueryAsync(DynamicSqlQueryParameters parameters);
+    Task<QueryResultDto> ExecuteQueryAsync(QueryParameters parameters);
+    Task<QueryResultDto> ListTablesAsync(DbConnectionParameters parameters);
+    Task<QueryResultDto> DescribeTableAsync(TableParameters parameters);
+    Task<QueryResultDto> SearchTablesAsync(SearchParameters parameters);
 }

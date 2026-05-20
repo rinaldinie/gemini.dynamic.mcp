@@ -1,43 +1,28 @@
-﻿// Program.cs
-using Incaricotech.Wms.DynamicMcp.Services;
-using McpDotNet.Configuration;
-using McpDotNet.Server;
+using gemini.dynamic.mcp.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading.Tasks;
+using ModelContextProtocol;
 
-namespace Incaricotech.Wms.DynamicMcp;
+namespace gemini.dynamic.mcp;
 
-internal class Program
+internal static class Program
 {
     static async Task Main(string[] args)
     {
-        // 1. Configurazione della Dependency Injection
-        ServiceCollection services = new ServiceCollection();
-        services.AddSingleton();
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-        ServiceProvider serviceProvider = services.BuildServiceProvider();
+        // 1. Dependency Injection Configuration
+        builder.Services.AddSingleton<IDynamicSqlServerMcpService, DynamicSqlServerMcpService>();
 
-        // 2. Inizializzazione del Server MCP
-        // Configura il server per comunicare tramite Standard IO
-        IMcpServer server = new McpServerBuilder()
-            .WithStdioTransport()
-            .WithServiceProvider(serviceProvider)
-            .Build();
+        // 2. MCP Server Configuration
+        builder.Services.AddMcpServer()
+            .WithStdioServerTransport()
+            .WithTools();
 
-        // 3. Registrazione esplicita del Tool
-        IDynamicSqlServerMcpService sqlService = serviceProvider.GetRequiredService();
+        using IHost host = builder.Build();
 
-        server.RegisterTool(
-            name: "execute_dynamic_sql_query",
-            description: "Connette a un SQL Server dinamicamente ed esegue una query SELECT.",
-            handler: async (Models.DynamicSqlQueryParameters parameters) =>
-                await sqlService.ExecuteDynamicQueryAsync(parameters)
-        );
-
-        // 4. Avvio in ascolto
-        // Il server resterà in esecuzione intercettando i messaggi JSON-RPC in entrata
-        await server.StartAsync();
+        // 3. Start the server
+        // The server will listen on Standard IO for JSON-RPC messages
+        await host.RunAsync();
     }
 }

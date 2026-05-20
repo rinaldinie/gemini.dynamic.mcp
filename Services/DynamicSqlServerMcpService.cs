@@ -1,76 +1,169 @@
-﻿using Dapper;
-using Incaricotech.Wms.DynamicMcp.Models;
-using McpDotNet.Server;
+using Dapper;
+using gemini.dynamic.mcp.Models;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Data;
-using System.Threading.Tasks;
+using System.Text.Json;
 
-namespace Incaricotech.Wms.DynamicMcp
+namespace gemini.dynamic.mcp.Services;
+
+public class DynamicSqlServerMcpService : IDynamicSqlServerMcpService
 {
-    /// <summary>
-    /// Servizio MCP che espone i tool all'agente.
-    /// </summary>
-    public class DynamicSqlServerMcpService
+    private string BuildConnectionString(DbConnectionParameters parameters)
     {
-        /// <summary>
-        /// Questo attributo espone il metodo come Tool MCP. Gemini leggerà la descrizione
-        /// per capire quando e come utilizzarlo.
-        /// </summary>
-        [McpTool(
-            "execute_dynamic_sql_query",
-            "Connette a un SQL Server specificato dinamicamente ed esegue una query SELECT in sola lettura."
-        )]
-        public async Task<string> ExecuteDynamicQueryAsync(DynamicSqlQueryParameters parameters)
+        SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
         {
-            // 1. Validazione base per bloccare tentativi di modifica dati (Clean Code practice)
-            if (!parameters.SqlQuery.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Errore: Sono consentite solo query SELECT per questioni di sicurezza.";
-            }
+            DataSource = parameters.ServerAddress,
+            InitialCatalog = parameters.DatabaseName,
+            UserID = parameters.Username,
+            Password = parameters.Password,
+            TrustServerCertificate = true, // Necessary for development/Docker environments
+            ConnectTimeout = 10
+        };
+        return builder.ConnectionString;
+    }
 
-            // 2. Costruzione sicura della stringa di connessione
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
+    public async Task<QueryResultDto> ExecuteQueryAsync(QueryParameters parameters)
+    {
+        try
+        {
+            // Execute the query using Dapper
+            using (SqlConnection connection = new SqlConnection(BuildConnectionString(parameters)))
             {
-                DataSource = parameters.ServerAddress,
-                InitialCatalog = parameters.DatabaseName,
-                UserID = parameters.Username,
-                Password = parameters.Password,
-                TrustServerCertificate = true, // Necessario per ambienti di sviluppo/container Docker
-                ConnectTimeout = 10
-            };
+                await connection.OpenAsync();
 
-            QueryResultDto result = new QueryResultDto();
+                // Execute query as IEnumerable<dynamic>
+                // This allows for any query, including those that return results
+                IEnumerable<dynamic> queryData = await connection.QueryAsync<dynamic>(parameters.SqlQuery);
 
-            // 3. Esecuzione della query con gestione sicura delle risorse (using)
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+                return new QueryResultDto
                 {
-                    await connection.OpenAsync();
-
-                    // Utilizziamo Dapper per estrarre i dati in formato dinamico e li serializziamo.
-                    // Nota: In questo caso isolato usiamo dynamic perché la struttura dei dati di 
-                    // ritorno non è nota a priori (essendo la query arbitraria).
-                    var queryData = await connection.QueryAsync<dynamic>(parameters.SqlQuery);
-
-                    result.Success = true;
-                    result.JsonData = System.Text.Json.JsonSerializer.Serialize(queryData);
-                }
+                    Success = true,
+                    JsonData = JsonSerializer.Serialize(queryData)
+                };
             }
-            catch (SqlException ex)
+        }
+        catch (SqlException ex)
+        {
+            return new QueryResultDto
             {
-                result.Success = false;
-                result.ErrorMessage = $"Errore di connessione o esecuzione SQL: {ex.Message}";
-            }
-            catch (Exception ex)
+                Success = false,
+                ErrorMessage = $"SQL Connection or Execution Error: {ex.Message}"
+            };
+        }
+        catch (Exception ex)
+        {
+            return new QueryResultDto
             {
-                result.Success = false;
-                result.ErrorMessage = $"Errore generico: {ex.Message}";
-            }
+                Success = false,
+                ErrorMessage = $"Generic Error: {ex.Message}"
+            };
+        }
+    }
 
-            // 4. Restituiamo una risposta strutturata in JSON che Gemini possa parsare facilmente
-            return System.Text.Json.JsonSerializer.Serialize(result);
+    public async Task<QueryResultDto> ListTablesAsync(DbConnectionParameters parameters)
+    {
+        const string query = "SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
+
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(BuildConnectionString(parameters)))
+            {
+                await connection.OpenAsync();
+                IEnumerable<dynamic> tables = await connection.QueryAsync<dynamic>(query);
+
+                return new QueryResultDto
+                {
+                    Success = true,
+                    JsonData = JsonSerializer.Serialize(tables)
+                };
+            }
+        }
+        catch (SqlException ex)
+        {
+            return new QueryResultDto
+            {
+                Success = false,
+                ErrorMessage = $"SQL Error listing tables: {ex.Message}"
+            };
+        }
+        catch (Exception ex)
+        {
+            return new QueryResultDto
+            {
+                Success = false,
+                ErrorMessage = $"Error listing tables: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<QueryResultDto> DescribeTableAsync(TableParameters parameters)
+    {
+        const string query = "SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @TableName";
+
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(BuildConnectionString(parameters)))
+            {
+                await connection.OpenAsync();
+                IEnumerable<dynamic> columns = await connection.QueryAsync<dynamic>(query, new { parameters.TableName });
+
+                return new QueryResultDto
+                {
+                    Success = true,
+                    JsonData = JsonSerializer.Serialize(columns)
+                };
+            }
+        }
+        catch (SqlException ex)
+        {
+            return new QueryResultDto
+            {
+                Success = false,
+                ErrorMessage = $"SQL Error describing table {parameters.TableName}: {ex.Message}"
+            };
+        }
+        catch (Exception ex)
+        {
+            return new QueryResultDto
+            {
+                Success = false,
+                ErrorMessage = $"Error describing table {parameters.TableName}: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<QueryResultDto> SearchTablesAsync(SearchParameters parameters)
+    {
+        const string query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME LIKE @SearchPattern";
+
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(BuildConnectionString(parameters)))
+            {
+                await connection.OpenAsync();
+                IEnumerable<dynamic> tables = await connection.QueryAsync<dynamic>(query, new { parameters.SearchPattern });
+
+                return new QueryResultDto
+                {
+                    Success = true,
+                    JsonData = JsonSerializer.Serialize(tables)
+                };
+            }
+        }
+        catch (SqlException ex)
+        {
+            return new QueryResultDto
+            {
+                Success = false,
+                ErrorMessage = $"SQL Error searching tables with pattern {parameters.SearchPattern}: {ex.Message}"
+            };
+        }
+        catch (Exception ex)
+        {
+            return new QueryResultDto
+            {
+                Success = false,
+                ErrorMessage = $"Error searching tables with pattern {parameters.SearchPattern}: {ex.Message}"
+            };
         }
     }
 }
