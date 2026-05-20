@@ -1,25 +1,15 @@
 {
   "name": "sql-server-dynamic-suite",
   "version": "1.0.0",
-  "description": "Suite completa SQL Server (Query, List, Describe, Search) con credenziali dinamiche. Eseguito tramite container SDK Microsoft ufficiale.",
+  "description": "Suite completa SQL Server (Query, List, Describe, Search) con credenziali dinamiche.",
   "mcpServers": {
     "sql-server-dynamic": {
-      "command": "docker",
+      "command": "dotnet",
       "args": [
         "run",
-        "-i",
-        "--rm",
-        "-v",
-        "${extensionPath}:/app",
-        "-w",
-        "/app",
-        "-e",
-        "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1",
-        "mcr.microsoft.com/dotnet/sdk:9.0",
-        "dotnet",
-        "run",
         "--project",
-        "gemini.dynamic.mcp.csproj"
+        "${extensionPath}/gemini.dynamic.mcp.csproj",
+        "-c", "Release"
       ]
     }
   }
