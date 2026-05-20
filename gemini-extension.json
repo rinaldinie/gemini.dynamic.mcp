@@ -9,8 +9,13 @@
         "run",
         "--project",
         "${extensionPath}/gemini.dynamic.mcp.csproj",
-        "-c", "Release"
-      ]
+        "--configuration",
+        "Release",
+        "--"
+      ],
+      "env": {
+        "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT": "1"
+      }
     }
   }
 }
