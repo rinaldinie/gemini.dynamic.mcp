@@ -1,0 +1,15 @@
+{
+  "name": "sql-server-dynamic-suite",
+  "version": "1.0.0",
+  "description": "Suite completa per interagire con SQL Server (Query, List, Describe, Search) con credenziali dinamiche.",
+  "mcpServers": {
+    "sql-server-dynamic": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${extensionPath}/gemini.dynamic.mcp.csproj"
+      ]
+    }
+  }
+}
