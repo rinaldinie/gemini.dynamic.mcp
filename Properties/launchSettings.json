@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "gemini.dynamic.mcp": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
