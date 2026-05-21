@@ -9,6 +9,7 @@ namespace gemini.dynamic.mcp.Tools;
 /// <summary>
 /// Wrapper class for the MCP tool.
 /// </summary>
+[McpToolType]
 public class SqlServerTools
 {
     private readonly IDynamicSqlServerMcpService _service;
@@ -22,15 +23,17 @@ public class SqlServerTools
     /// Ping tool for testing discovery.
     /// </summary>
     [McpTool]
-    public Task<string> Ping(string message)
+    [Description("A simple ping tool to verify server connectivity and tool discovery.")]
+    public string Ping(string message)
     {
-        return Task.FromResult($"Server is ready. Echo: {message}");
+        return $"Server is ready. Echo: {message}";
     }
 
     /// <summary>
     /// Connects to a SQL Server dynamically and executes a SQL query.
     /// </summary>
     [McpTool]
+    [Description("Executes a SQL query on a SQL Server database using dynamic credentials.")]
     public async Task<string> ExecuteDynamicSqlQuery(QueryParameters parameters)
     {
         QueryResultDto result = await _service.ExecuteQueryAsync(parameters);
@@ -42,9 +45,7 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Lists all tables in the specified SQL Server database.")]
-    public async Task<string> ListTables(
-        [Description("Connection parameters for the database.")]
-        DbConnectionParameters parameters)
+    public async Task<string> ListTables(DbConnectionParameters parameters)
     {
         QueryResultDto result = await _service.ListTablesAsync(parameters);
         return JsonSerializer.Serialize(result);
