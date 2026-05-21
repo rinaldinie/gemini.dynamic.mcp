@@ -22,9 +22,11 @@ internal static class Program
         builder.Services.AddSingleton<SqlServerTools>();
 
         // 2. MCP Server Configuration
-        builder.Services.AddMcpServer()
+        var mcpBuilder = builder.Services.AddMcpServer()
             .WithStdioServerTransport()
             .WithTools(typeof(SqlServerTools));
+
+        Console.Error.WriteLine("MCP Server configured with SqlServerTools.");
 
         using IHost host = builder.Build();
 
