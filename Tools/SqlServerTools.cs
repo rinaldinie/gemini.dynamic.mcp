@@ -20,6 +20,18 @@ public class SqlServerTools
     }
 
     /// <summary>
+    /// Ping tool for testing discovery.
+    /// </summary>
+    [McpTool]
+    [Description("A simple ping tool to verify server connectivity and tool discovery.")]
+    public Task<string> Ping(
+        [Description("A message to echo back.")]
+        string message)
+    {
+        return Task.FromResult($"Server is ready. Echo: {message}");
+    }
+
+    /// <summary>
     /// Connects to a SQL Server dynamically and executes a SQL query.
     /// </summary>
     /// <param name="parameters">The query parameters.</param>
