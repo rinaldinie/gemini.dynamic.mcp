@@ -1,4 +1,5 @@
 using gemini.dynamic.mcp.Services;
+using gemini.dynamic.mcp.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,11 +18,12 @@ internal static class Program
 
         // 1. Dependency Injection Configuration
         builder.Services.AddSingleton<IDynamicSqlServerMcpService, DynamicSqlServerMcpService>();
+        builder.Services.AddSingleton<SqlServerTools>();
 
         // 2. MCP Server Configuration
         builder.Services.AddMcpServer()
             .WithStdioServerTransport()
-            .WithTools();
+            .WithTools<SqlServerTools>();
 
         using IHost host = builder.Build();
 
