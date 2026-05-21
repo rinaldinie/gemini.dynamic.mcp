@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol;
+using ModelContextProtocol.Server;
 
 namespace gemini.dynamic.mcp;
 
@@ -32,3 +33,4 @@ internal static class Program
         await host.RunAsync();
     }
 }
+
