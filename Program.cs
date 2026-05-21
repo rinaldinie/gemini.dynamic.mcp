@@ -23,7 +23,7 @@ internal static class Program
         // 2. MCP Server Configuration
         builder.Services.AddMcpServer()
             .WithStdioServerTransport()
-            .WithTools<SqlServerTools>();
+            .WithToolsFromAssembly();
 
         using IHost host = builder.Build();
 

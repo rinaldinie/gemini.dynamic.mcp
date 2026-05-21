@@ -64,4 +64,59 @@ public class SqlServerTools
         QueryResultDto result = await _service.SearchTablesAsync(parameters);
         return JsonSerializer.Serialize(result);
     }
+
+    /// <summary>
+    /// Gets the top 10 slow queries based on CPU time.
+    /// </summary>
+    [McpTool]
+    [Description("Gets the top 10 slow queries in the database based on CPU time.")]
+    public async Task<string> GetSlowQueries(DbConnectionParameters parameters)
+    {
+        QueryResultDto result = await _service.GetSlowQueriesAsync(parameters);
+        return JsonSerializer.Serialize(result);
+    }
+
+    /// <summary>
+    /// Gets active locks and blocking sessions.
+    /// </summary>
+    [McpTool]
+    [Description("Gets active locks and identifies blocking chains in the database.")]
+    public async Task<string> GetActiveLocks(DbConnectionParameters parameters)
+    {
+        QueryResultDto result = await _service.GetActiveLocksAsync(parameters);
+        return JsonSerializer.Serialize(result);
+    }
+
+    /// <summary>
+    /// Gets fragmented indexes (avg fragmentation > 10%).
+    /// </summary>
+    [McpTool]
+    [Description("Identifies fragmented indexes in the database (fragmentation > 10%).")]
+    public async Task<string> GetIndexFragmentation(DbConnectionParameters parameters)
+    {
+        QueryResultDto result = await _service.GetIndexFragmentationAsync(parameters);
+        return JsonSerializer.Serialize(result);
+    }
+
+    /// <summary>
+    /// Gets missing index recommendations.
+    /// </summary>
+    [McpTool]
+    [Description("Retrieves missing index recommendations based on SQL Server DMVs.")]
+    public async Task<string> GetMissingIndexes(DbConnectionParameters parameters)
+    {
+        QueryResultDto result = await _service.GetMissingIndexesAsync(parameters);
+        return JsonSerializer.Serialize(result);
+    }
+
+    /// <summary>
+    /// Gets logical and physical database size.
+    /// </summary>
+    [McpTool]
+    [Description("Gets the logical and physical size of the current database files.")]
+    public async Task<string> GetDatabaseSize(DbConnectionParameters parameters)
+    {
+        QueryResultDto result = await _service.GetDatabaseSizeAsync(parameters);
+        return JsonSerializer.Serialize(result);
+    }
 }
