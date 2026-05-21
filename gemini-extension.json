@@ -6,12 +6,7 @@
     "sql-server-dynamic": {
       "command": "dotnet",
       "args": [
-        "run",
-        "--project",
-        "${extensionPath}/gemini.dynamic.mcp.csproj",
-        "--configuration",
-        "Release",
-        "--"
+        "${extensionPath}/bin/Release/net9.0/gemini.dynamic.mcp.dll"
       ],
       "env": {
         "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT": "1"
