@@ -4,9 +4,10 @@
   "description": "Suite completa SQL Server (Query, List, Describe, Search) con credenziali dinamiche.",
   "mcpServers": {
     "sql-server-dynamic": {
-      "command": "dotnet",
+      "command": "sh",
       "args": [
-        "${extensionPath}/bin/Release/net9.0/gemini.dynamic.mcp.dll"
+        "-c",
+        "dotnet build \"${extensionPath}/gemini.dynamic.mcp.csproj\" -c Release -v q >&2 && dotnet \"${extensionPath}/bin/Release/net9.0/gemini.dynamic.mcp.dll\""
       ],
       "env": {
         "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT": "1"
