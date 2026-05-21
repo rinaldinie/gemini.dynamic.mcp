@@ -26,7 +26,9 @@ public class SqlServerTools
     /// <returns>A serialized string of the result.</returns>
     [McpTool]
     [Description("Executes a SQL query on a SQL Server database using dynamic credentials.")]
-    public async Task<string> ExecuteDynamicSqlQuery(QueryParameters parameters)
+    public async Task<string> ExecuteDynamicSqlQuery(
+        [Description("Query parameters including connection details and SQL query.")]
+        QueryParameters parameters)
     {
         QueryResultDto result = await _service.ExecuteQueryAsync(parameters);
         return JsonSerializer.Serialize(result);
@@ -37,7 +39,9 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Lists all tables in the specified SQL Server database.")]
-    public async Task<string> ListTables(DbConnectionParameters parameters)
+    public async Task<string> ListTables(
+        [Description("Connection parameters for the database.")]
+        DbConnectionParameters parameters)
     {
         QueryResultDto result = await _service.ListTablesAsync(parameters);
         return JsonSerializer.Serialize(result);
@@ -48,7 +52,9 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Describes the schema (columns, types) of a specific table in the database.")]
-    public async Task<string> DescribeTable(TableParameters parameters)
+    public async Task<string> DescribeTable(
+        [Description("Parameters including the table name to describe.")]
+        TableParameters parameters)
     {
         QueryResultDto result = await _service.DescribeTableAsync(parameters);
         return JsonSerializer.Serialize(result);
@@ -59,7 +65,9 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Searches for tables in the database that match a specific name pattern.")]
-    public async Task<string> SearchTables(SearchParameters parameters)
+    public async Task<string> SearchTables(
+        [Description("Parameters including the search pattern (e.g., %Users%).")]
+        SearchParameters parameters)
     {
         QueryResultDto result = await _service.SearchTablesAsync(parameters);
         return JsonSerializer.Serialize(result);
@@ -70,7 +78,9 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Gets the top 10 slow queries in the database based on CPU time.")]
-    public async Task<string> GetSlowQueries(DbConnectionParameters parameters)
+    public async Task<string> GetSlowQueries(
+        [Description("Connection parameters for the database.")]
+        DbConnectionParameters parameters)
     {
         QueryResultDto result = await _service.GetSlowQueriesAsync(parameters);
         return JsonSerializer.Serialize(result);
@@ -81,7 +91,9 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Gets active locks and identifies blocking chains in the database.")]
-    public async Task<string> GetActiveLocks(DbConnectionParameters parameters)
+    public async Task<string> GetActiveLocks(
+        [Description("Connection parameters for the database.")]
+        DbConnectionParameters parameters)
     {
         QueryResultDto result = await _service.GetActiveLocksAsync(parameters);
         return JsonSerializer.Serialize(result);
@@ -92,7 +104,9 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Identifies fragmented indexes in the database (fragmentation > 10%).")]
-    public async Task<string> GetIndexFragmentation(DbConnectionParameters parameters)
+    public async Task<string> GetIndexFragmentation(
+        [Description("Connection parameters for the database.")]
+        DbConnectionParameters parameters)
     {
         QueryResultDto result = await _service.GetIndexFragmentationAsync(parameters);
         return JsonSerializer.Serialize(result);
@@ -103,7 +117,9 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Retrieves missing index recommendations based on SQL Server DMVs.")]
-    public async Task<string> GetMissingIndexes(DbConnectionParameters parameters)
+    public async Task<string> GetMissingIndexes(
+        [Description("Connection parameters for the database.")]
+        DbConnectionParameters parameters)
     {
         QueryResultDto result = await _service.GetMissingIndexesAsync(parameters);
         return JsonSerializer.Serialize(result);
@@ -114,7 +130,9 @@ public class SqlServerTools
     /// </summary>
     [McpTool]
     [Description("Gets the logical and physical size of the current database files.")]
-    public async Task<string> GetDatabaseSize(DbConnectionParameters parameters)
+    public async Task<string> GetDatabaseSize(
+        [Description("Connection parameters for the database.")]
+        DbConnectionParameters parameters)
     {
         QueryResultDto result = await _service.GetDatabaseSizeAsync(parameters);
         return JsonSerializer.Serialize(result);
